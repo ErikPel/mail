@@ -1,5 +1,6 @@
 <?php
- /**
+
+/**
  * ownCloud
  *
  * @author Thomas Müller
@@ -24,6 +25,7 @@ use OCA\Mail\Service\HtmlPurify\TransformHTMLLinks;
 use OCA\Mail\Service\HtmlPurify\TransformImageSrc;
 use OCA\Mail\Service\HtmlPurify\TransformNoReferrer;
 use OCA\Mail\Service\HtmlPurify\TransformURLScheme;
+use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\Util;
 
@@ -32,8 +34,12 @@ class Html {
 	/** @var IURLGenerator */
 	private $urlGenerator;
 
-	public function __construct(IURLGenerator $urlGenerator) {
+	/** @var IRequest */
+	private $request;
+
+	public function __construct(IURLGenerator $urlGenerator, IRequest $request) {
 		$this->urlGenerator = $urlGenerator;
+		$this->request = $request;
 	}
 
 	/**
@@ -107,7 +113,7 @@ class Html {
 		$html->info_attr_transform_post['htmllinks'] = new TransformHTMLLinks();
 
 		$uri = $config->getDefinition('URI');
-		$uri->addFilter(new TransformURLScheme($messageParameters, $mapCidToAttachmentId, $this->urlGenerator), $config);
+		$uri->addFilter(new TransformURLScheme($messageParameters, $mapCidToAttachmentId, $this->urlGenerator, $this->request), $config);
 
 		HTMLPurifier_URISchemeRegistry::instance()->register('cid', new CidURIScheme());
 

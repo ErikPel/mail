@@ -24,7 +24,8 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testLinkDetection($expected, $text){
 		$urlGenerator = \OC::$server->getURLGenerator();
-		$html = new Html($urlGenerator);
+		$request = \OC::$server->getRequest();
+		$html = new Html($urlGenerator, $request);
 		$withLinks = $html->convertLinks($text);
 		$this->assertSame($expected, $withLinks);
     }
@@ -57,7 +58,8 @@ class HtmlTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testParseMailBody($expectedBody, $expectedSignature, $text){
 		$urlGenerator = \OC::$server->getURLGenerator();
-		$html = new Html($urlGenerator);
+		$request = \OC::$server->getRequest();
+		$html = new Html($urlGenerator, $request);
 		list($b, $s) = $html->parseMailBody($text);
 		$this->assertSame($expectedBody, $b);
 		$this->assertSame($expectedSignature, $s);

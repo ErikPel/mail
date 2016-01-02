@@ -13,12 +13,11 @@
 namespace OCA\Mail\Service\HtmlPurify;
 
 use HTMLPurifier_Config;
-use HTMLPurifier_Context;
 use HTMLPurifier_URI;
 use HTMLPurifier_URIFilter;
 use HTMLPurifier_URIParser;
+use OCP\IRequest;
 use OCP\IURLGenerator;
-use OCP\Util;
 
 class TransformURLScheme extends HTMLPurifier_URIFilter {
 	public $name = 'TransformURLScheme';
@@ -27,15 +26,20 @@ class TransformURLScheme extends HTMLPurifier_URIFilter {
 	/** @var IURLGenerator */
 	private $urlGenerator;
 
+	/** @var IRequest */
+	private $request;
+
 	/**
 	 * @var \Closure
 	 */
 	private $mapCidToAttachmentId;
 
-	public function __construct($messageParameters, \Closure $mapCidToAttachmentId, IURLGenerator $urlGenerator) {
+	public function __construct($messageParameters, \Closure $mapCidToAttachmentId,
+		IURLGenerator $urlGenerator, IRequest $request) {
 		$this->messageParameters = $messageParameters;
 		$this->mapCidToAttachmentId = $mapCidToAttachmentId;
 		$this->urlGenerator = $urlGenerator;
+		$this->request = $request;
 	}
 
 	/**
@@ -87,9 +91,9 @@ class TransformURLScheme extends HTMLPurifier_URIFilter {
 		// otherwise it's an element that we send through our proxy
 		if ($element === 'href') {
 			$uri = new \HTMLPurifier_URI(
-				Util::getServerProtocol(),
+				$this->request->getServerProtocol(),
 				null,
-				Util::getServerHost(),
+				$this->request->getServerHost(),
 				null,
 				$this->urlGenerator->linkToRoute('mail.proxy.redirect'),
 				'src=' . $originalURL,
@@ -97,9 +101,9 @@ class TransformURLScheme extends HTMLPurifier_URIFilter {
 			return $uri;
 		} else {
 			$uri = new \HTMLPurifier_URI(
-				Util::getServerProtocol(),
+				$this->request->getServerProtocol(),
 				null,
-				Util::getServerHost(),
+				$this->request->getServerHost(),
 				null,
 				$this->urlGenerator->linkToRoute('mail.proxy.proxy'),
 				'src=' . $originalURL . '&requesttoken=' . \OC::$server->getSession()->get('requesttoken'),
